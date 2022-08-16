@@ -25,6 +25,7 @@ import {
   CONTROL_MSG
 } from "./types";
 import { jitteredExponentialRetry, NonRetryableError } from "./utils/retry";
+import { stripIgnoredCharacters } from "graphql";
 
 const logger = rootLogger.extend("subscriptions");
 
@@ -123,10 +124,12 @@ export class AppSyncRealTimeSubscriptionHandshakeLink extends ApolloLink {
 
         token = this.auth.type === AUTH_TYPE.AWS_LAMBDA ? this.auth.token : token;
 
+        const minimizedQuery = stripIgnoredCharacters(print(query))
+
         const options = {
           appSyncGraphqlEndpoint: this.url,
           authenticationType: this.auth.type,
-          query: print(query),
+          query: minimizedQuery,
           region: this.region,
           graphql_headers: () => (headers),
           variables,
